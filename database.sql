@@ -313,3 +313,7 @@ CREATE TABLE ApplicationKey (id SERIAL NOT NULL,
             revocationDate DATE NOT NULL,
             PRIMARY KEY (id),
             FOREIGN KEY (accountId) REFERENCES Account(id));
+
+--changeset gertvv:34
+ALTER TABLE VersionMapping ADD UNIQUE(versionedDatasetUrl);
+ALTER TABLE VersionMapping ADD UNIQUE(trialverseDatasetUrl);
