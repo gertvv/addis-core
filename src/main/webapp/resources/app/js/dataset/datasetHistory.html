@@ -1,0 +1,17 @@
+<navbar-directive>
+</navbar-directive>
+<ul class="breadcrumbs">
+  <li><a ui-sref="user">Datasets</a></li>
+  <li><a ui-sref="versionedDataset({userUid: userUid, datasetUUID: datasetUUID, versionUuid: versionUuid})">{{dataset.label}}</a></li>
+  <li><a class="current active">History</a></li>
+</ul>
+<div class="row">
+  <div class="columns large-12">
+    <h1>Dataset history</h1>
+    <ul class="no-bullet">
+      <li ng-repeat="historyItem in historyItems | orderBy : 'historyOrder'  ">
+        <history-item item="historyItem"></history-item>
+      </li>
+    </ul>
+  </div>
+</div>

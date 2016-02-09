@@ -16,10 +16,9 @@
 package org.drugis.addis.security.repository.impl;
 
 import org.drugis.addis.security.Account;
-import org.drugis.addis.security.UsernameAlreadyInUseException;
 import org.drugis.addis.security.repository.AccountRepository;
+import org.drugis.trialverse.security.TooManyAccountsException;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -28,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.inject.Inject;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 @Repository
 public class AccountRepositoryImpl implements AccountRepository {
@@ -43,14 +43,10 @@ public class AccountRepositoryImpl implements AccountRepository {
   };
 
   @Transactional("ptmAddisCore")
-  public void createAccount(Account user) throws UsernameAlreadyInUseException {
-    try {
-      jdbcTemplate.update(
-              "insert into Account (firstName, lastName, username, email) values (?, ?, ?, ?)",
-              user.getFirstName(), user.getLastName(), user.getUsername(), user.getEmail());
-    } catch (DuplicateKeyException e) {
-      throw new UsernameAlreadyInUseException(user.getUsername());
-    }
+  public void createAccount(Account user) {
+    jdbcTemplate.update(
+            "insert into Account (firstName, lastName, username, email) values (?, ?, ?, ?)",
+            user.getFirstName(), user.getLastName(), user.getUsername(), user.getEmail());
   }
 
   public Account findAccountByUsername(String username) {
@@ -59,9 +55,37 @@ public class AccountRepositoryImpl implements AccountRepository {
             rowMapper, username);
   }
 
+  public Account findAccountByEmail(String email) {
+    return jdbcTemplate.queryForObject(
+            "select id, username, firstName, lastName, email from Account where email = ?",
+            rowMapper, email);
+  }
+
   public Account findAccountById(int id) {
     return jdbcTemplate.queryForObject(
             "select id, username, firstName, lastName, email from Account where id = ?",
             rowMapper, id);
   }
+
+  @Override
+  public Account findAccountByActiveApplicationKey(String applicationKey) throws TooManyAccountsException {
+
+    List<org.drugis.addis.security.Account> result = jdbcTemplate.query(
+            "select id, username, firstName, lastNamefrom Account where id = (" +
+                    "select accountId from ApplicationKey where secretkey = ? " +
+                    "AND revocationDate > now() " +
+                    "AND creationDate < now() )",
+            rowMapper, applicationKey);
+
+    if (result.size() > 1) {
+      throw new TooManyAccountsException();
+    }
+    return result.size() == 0 ? null : result.get(0);
+  }
+
+  @Override
+  public List<Account> getUsers() {
+    return jdbcTemplate.query("select id, username, firstName, lastName, email from Account", rowMapper);
+  }
+
 }

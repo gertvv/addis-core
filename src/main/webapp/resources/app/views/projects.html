@@ -1,69 +1,40 @@
-<div class="row">
-    <div class="columns">
-         <div ng-if="error" class="row" ng-cloak>
-            <div class="columns">
-                <app-alert type="alert" close="error.close()" error="error"></span></app-alert>
-            </div>
-        </div>
-        <alert type="info">
-            <strong>Disclaimer:</strong>this is
-            <em>beta</em>software. We store your projects on our servers. While we try our best to keep them secure and
-            compatible with future versions, we can make no guarantees.
-        </alert>
-    </div>
-</div>
-<div class="row">
+<div ui-view>
+  <div class="row">
     <div class="columns large-8">
-
-        <h2 id="projects-page-header" class="nested-view-header">Projects</h2>
-
-        <p>A project consists of a number of analyses based on a PICO definition (Population, Interventions,
-            Comparisons, Outcomes). You can now define your own projects and look at (but not modify) other people's
-            projects.</p>
-
-        <div>
-            <a id="create-project-btn" ui-sref="create-project" class="button "><i class="fa fa-plus"></i> Create project</a>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="columns large-12">
-        <div class="row">
-            <div class="columns large-2">
-                <h3>Your projects</h3>
+      <div>
+        <em ng-show="!(projects | ownProjectsFilter:user.id).length">No projects have been created</em>
+        <div style="margin-bottom: 3rem; border-bottom: 1px solid #DCDCDC" ng-repeat="project in projects | ownProjectsFilter:user.id ">
+          <div class="row">
+            <div class="columns large-6">
+              <h5>
+                <a ui-sref="project({userUid: user.id, projectId: project.id})">
+                  <span title="project name">{{project.name}}</span>
+                </a>
+              </h5>
             </div>
-
+          </div>
+          <div class="row">
+            <div class="columns large-6">
+              {{project.description}}
+            </div>
+          </div>
         </div>
-
-        <div class="panel">
-            <ul>
-                <li ng-show="!(projects | ownProjectsFilter:user.id).length">No projects</li>
-                <li ng-repeat="project in projects | ownProjectsFilter:user.id ">
-                    <a href="#/projects/{{project.id}}">
-                        <span title="project name">{{project.name}}</span>-
-                        <span title="project description">{{project.description}}</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-
-        <h3>Other projects</h3>
-
-        <div class="panel">
-            <ul>
-                <li ng-show="!(projects | ownProjectsFilter:user.id:true).length">No other projects</li>
-                <li ng-repeat="project in projects | ownProjectsFilter:user.id:true">
-                    <a href="#/projects/{{project.id}}">
-                        <span title="project name">{{project.name}}</span>-
-                        <span title="project description">{{project.description}}</span>
-                        <span title="user name">({{project.owner.firstName}} {{project.owner.lastName}})</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-
-        <div ui-view></div>
-
+      </div>
     </div>
+    <div class="columns large-4">
+      <h2>Other users</h2>
+      <ul class="no-bullet">
+        <li ng-cloak class="ng-cloak" ng-show="!otherUsers.length">
+          <em>You are the only user of addis</em>
+        </li>
+        <li ng-repeat="otherUser in otherUsers" style="margin-bottom: 1rem;">
+          <a ui-sref="datasets({userUid: otherUser.id})">
+            <img class="user-image" ng-src="https://secure.gravatar.com/avatar/{{::otherUser.md5}}?s=43&d=mm"> {{::otherUser.firstName}} {{::otherUser.lastName}}
+          </a>
+          <span ng-show="loginUser.id === otherUser.id">
+            (this is you)</span>
+        </li>
+      </ul>
+    </div>
+  </div>
 </div>

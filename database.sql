@@ -304,6 +304,7 @@ CREATE TABLE VersionMapping (id SERIAL NOT NULL,
     ownerUuid VARCHAR NOT NULL,
     trialverseDatasetUrl VARCHAR NOT NULL,
     PRIMARY KEY (id));
+--rollback DROP TABLE versionmapping;
 
 CREATE TABLE ApplicationKey (id SERIAL NOT NULL,
             secretKey VARCHAR UNIQUE,
@@ -313,7 +314,16 @@ CREATE TABLE ApplicationKey (id SERIAL NOT NULL,
             revocationDate DATE NOT NULL,
             PRIMARY KEY (id),
             FOREIGN KEY (accountId) REFERENCES Account(id));
+--rollback DROP TABLE applicationkey;
 
---changeset gertvv:34
-ALTER TABLE VersionMapping ADD UNIQUE(versionedDatasetUrl);
-ALTER TABLE VersionMapping ADD UNIQUE(trialverseDatasetUrl);
+--changeset reidd:34
+ALTER TABLE account ADD CONSTRAINT unique_email UNIQUE (email);
+--rollback ALTER TABLE account DROP CONSTRAINT unique_email;
+ALTER TABLE account ALTER email SET NOT NULL;
+--rollback ALTER TABLE account ALTER email DROP NOT NULL;
+
+--changeset reidd:35
+ALTER TABLE versionmapping ADD CONSTRAINT unique_versionedDatasetUrl unique(versionedDatasetUrl);
+--rollback ALTER TABLE versionmapping DROP CONSTRAINT unique_versionedDatasetUrl;
+ALTER TABLE versionmapping ADD CONSTRAINT unique_trialverseDatasetUrl UNIQUE(trialverseDatasetUrl);
+--rollback ALTER TABLE versionmapping DROP CONSTRAINT unique_trialverseDatasetUrl;
